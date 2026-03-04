@@ -1,0 +1,31 @@
+# UE5 Build Artifacts
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+
+# IDE
+.vs/
+.vscode/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+.idea/
+*.xcworkspace
+*.xcodeproj
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Compiled
+*.pdb
+*.obj
+*.lib
+*.dll
+*.dylib
+*.so

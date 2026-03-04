@@ -1,0 +1,17 @@
+{
+    "FileVersion": 3,
+    "Version": 1,
+    "VersionName": "1.0",
+    "FriendlyName": "Hardware Trigger Plugin",
+    "Description": "Reads fire button signals from an Arduino via serial port. Sends 'F' byte on trigger pull.",
+    "Category": "Input",
+    "CreatedBy": "SDT Team",
+    "CanContainContent": false,
+    "Modules": [
+        {
+            "Name": "HardwareTrigger",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        }
+    ]
+}

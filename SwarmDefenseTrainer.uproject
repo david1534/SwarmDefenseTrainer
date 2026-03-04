@@ -1,0 +1,27 @@
+{
+    "FileVersion": 3,
+    "EngineAssociation": "5.4",
+    "Category": "Game",
+    "Description": "Swarm Defense Trainer - Counter UAS Training System",
+    "Modules": [
+        {
+            "Name": "SwarmDefenseTrainer",
+            "Type": "Runtime",
+            "LoadingPhase": "Default",
+            "AdditionalDependencies": [
+                "Engine",
+                "UMG"
+            ]
+        }
+    ],
+    "Plugins": [
+        {
+            "Name": "VN100Input",
+            "Enabled": true
+        },
+        {
+            "Name": "HardwareTrigger",
+            "Enabled": true
+        }
+    ]
+}
