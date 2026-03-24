@@ -11,6 +11,7 @@ public class SwarmDefenseTrainer : ModuleRules
             "CoreUObject",
             "Engine",
             "InputCore",
+            "DeveloperSettings",
             "Slate",
             "SlateCore",
             "VN100Input",
