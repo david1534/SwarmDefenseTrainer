@@ -128,49 +128,81 @@ You do NOT need any hardware to develop and test. The game runs fully in mock mo
 
 The game needs a map called `BattleArena`. It does not exist yet -- you create it in the editor.
 
+> **UE5 Editor Orientation (read this first if you've never used Unreal):**
+>
+> When the editor opens you will see:
+> - **Viewport** — the large 3D view in the center. This is where you see and place objects in your game world.
+> - **Content Browser** — the panel at the bottom. This is your file manager for game assets (maps, meshes, Blueprints, etc.). If you don't see it, go to **Window > Content Browser > Content Browser 1**.
+> - **Details panel** — the panel on the right. When you click on any object in the viewport, its properties appear here (location, rotation, scale, mesh, etc.). If you don't see it, go to **Window > Details**.
+> - **Outliner** — the panel listing every object in the current level (usually top-right). If you don't see it, go to **Window > Outliner**.
+> - **Toolbar** — the horizontal bar at the top with buttons like Play, Save, etc.
+> - **Main menu bar** — the very top: File, Edit, Window, Tools, Build, etc.
+
 **Step 4 -- Create the BattleArena Map**
 
-1. In the UE5 editor menu bar: **File > New Level**
-2. Select **Basic** (this gives you a floor, sky, and lighting out of the box)
+1. In the UE5 editor menu bar at the very top: click **File > New Level**
+2. A dialog appears with level templates. Select **Basic** (this gives you a floor, sky, and lighting out of the box)
 3. Click **Create**
-4. **File > Save Current Level As...**
-5. In the save dialog, navigate to (or create) the folder: `Content/Maps/`
-   - If the `Maps` folder doesn't exist: right-click in the Content Browser > **New Folder** > name it `Maps`
-6. Save the level as **BattleArena**
-   - The full path should be: `/Game/Maps/BattleArena`
+4. You should now see a 3D viewport with a floor and sky
+5. Save it: click **File > Save Current Level As...**
+6. In the save dialog:
+   - You should see a `Content` folder. If you see a `Maps` folder inside it, click into it. If not, click the **+ New Folder** button (or right-click > **New Folder**), name it `Maps`, then click into it
+   - In the **Name** field at the bottom, type: **BattleArena**
+   - Click **Save**
+   - The full path should now be: `/Game/Maps/BattleArena`
 
 **Step 5 -- Place the High Value Asset (HVA)**
 
-This is the object the player defends. Drones fly toward it. Required.
+This is the object the player defends. Drones fly toward it. **Required — the game will not work without it.**
 
-1. In the top menu: **Edit > Place Actors** (or use the Place Actors panel on the left)
-2. In the search box, type **SDTHighValueAsset**
-3. Drag `SDTHighValueAsset` into the viewport
-4. In the **Details** panel (right side), set its location to: `X=0, Y=0, Z=50`
-5. Under the **MeshComponent**, click the dropdown next to **Static Mesh**
-6. Pick any placeholder mesh -- for example type `Cube` or `Cylinder` and select one
-7. Adjust the **Scale** to make it visible (e.g., `X=3, Y=3, Z=3` for a cube)
-8. Optionally assign a material to give it color
+1. Open the **Place Actors** panel using one of these methods (the menu location changed in UE 5.7):
+   - **Method A (recommended):** Click the **`+`** (plus) button in the **top-left of the toolbar** — this opens the quick-add menu
+   - **Method B:** Press **Ctrl+Shift+1** on your keyboard to toggle the Place Actors panel
+   - **Method C:** Go to **Window > Place Actors** from the top menu bar
+2. In the search box at the top of the Place Actors panel, type: **SDTHighValueAsset**
+   - You should see `SDTHighValueAsset` appear in the list. If you don't see it, make sure the project compiled successfully (check Step 3)
+3. **Drag** `SDTHighValueAsset` from the list **into the viewport** (the 3D view). Drop it somewhere near the center of the floor
+4. The HVA is now in your level but may look like a small white dot (it has no mesh yet). Click on it in the viewport to select it — you'll see an orange outline
+5. In the **Details panel** (right side), find the **Transform** section at the top:
+   - Set **Location** to: `X = 0`, `Y = 0`, `Z = 50`
+   - You can type the numbers directly into the X, Y, Z fields
+6. Still in the Details panel, scroll down to find **Mesh Component** (or click on `MeshComponent` in the Components list at the top of Details). Look for **Static Mesh**:
+   - Click the dropdown next to **Static Mesh** (it may say "None")
+   - In the search box that appears, type **Cube**
+   - Select **Cube** from the results. The HVA should now appear as a white cube in the viewport
+7. To make it bigger: in the **Transform** section, find **Scale** and set it to: `X = 3`, `Y = 3`, `Z = 3`
+8. (Optional) To give it color: in the Details panel, find **Materials** under the mesh component, click the dropdown next to **Element 0**, and pick any material (e.g., search for `Basic` or `M_Basic`)
+9. Press **Ctrl+S** to save
 
 **Step 6 -- Place the Player Start**
 
-This is where the player spawns. Required.
+This is where the player spawns and stands. The player is **stationary** (no walking/running), so this position is where they'll stay the entire game.
 
-1. In the Place Actors search, type **Player Start**
-2. Drag `Player Start` into the viewport
-3. Position it so the player faces the HVA. For example:
-   - Location: `X=-2000, Y=0, Z=100`
-   - Rotation: `Yaw=0` (facing toward X+ where the HVA is at 0,0,50)
-4. The player is **stationary** (no WASD movement), so choose the position carefully
-5. Make sure the Player Start arrow (blue arrow gizmo) points toward the HVA
+1. Open the Place Actors panel again (click the **`+`** button in the top-left toolbar, or press **Ctrl+Shift+1**)
+2. In the search box, type: **Player Start**
+3. **Drag** `Player Start` from the list **into the viewport**. Drop it on the floor, away from the HVA
+4. Click on the Player Start to select it. You'll see a blue arrow pointing in the direction the player will face
+5. In the **Details panel**, set its **Transform > Location** to:
+   - `X = -2000`, `Y = 0`, `Z = 100`
+   - This places the player 2000 units in front of the HVA (which is at 0,0,50)
+6. Make sure the **blue arrow** on the Player Start points toward the HVA (toward the cube). If it doesn't:
+   - Set **Transform > Rotation > Z (Yaw)** to `0` — this makes the player face in the +X direction (toward the HVA)
+   - You can also rotate it by selecting the Player Start, pressing **E** to switch to rotation mode, and dragging the blue (Z-axis) ring
+7. Press **Ctrl+S** to save
 
-**Step 7 -- Save the Map**
+> **Tip:** To see what the player will see, you can click on the Player Start, then in the viewport toolbar click the small camera icon or right-click the Player Start and select **Pilot** to view from its perspective. Press **Eject** or **F** to return to free camera.
 
-1. **Ctrl+S** to save
-2. Verify the map is set as default: **Edit > Project Settings > Maps & Modes**
-   - **Editor Startup Map** should be `/Game/Maps/BattleArena`
-   - **Game Default Map** should be `/Game/Maps/BattleArena`
-   - These should already be set from `DefaultEngine.ini`, but double-check
+**Step 7 -- Verify Map Settings**
+
+1. Go to **Edit > Project Settings** in the top menu bar (a large settings window opens)
+2. In the left sidebar, scroll down and click **Maps & Modes** (under the "Project" section)
+3. Verify these two fields:
+   - **Editor Startup Map**: should say `/Game/Maps/BattleArena`. If it says "None" or something else, click the dropdown and select `BattleArena`
+   - **Game Default Map**: should also say `/Game/Maps/BattleArena`. If not, set it the same way
+   - These tell UE which map to load when you hit Play and when the game launches
+4. These should already be set from `DefaultEngine.ini`, but it's worth double-checking
+5. Close the Project Settings window
+6. **Ctrl+S** to save
 
 ---
 
@@ -178,69 +210,116 @@ This is where the player spawns. Required.
 
 **Step 8 -- Play Test**
 
-1. Make sure `Config/DefaultGame.ini` has `InputMode=MockInput` (this is the default)
-2. Click the **Play** button (green triangle) in the UE5 toolbar, or press **Alt+P**
-3. You should see the **PreGame screen** with the title "SWARM DEFENSE TRAINER" and controls
+1. Make sure `Config/DefaultGame.ini` has `InputMode=MockInput` (this is the default — you don't need to change anything if you haven't touched this file)
+2. In the UE5 toolbar at the top, click the green **Play** button (triangle icon), or press **Alt+P**
+   - The viewport will switch to game mode and your mouse cursor will disappear (it's captured by the game)
+   - If nothing happens, make sure the viewport is focused (click on it first)
+3. You should see the **PreGame title screen** with:
+   - "SWARM DEFENSE TRAINER" title
+   - Controls list
+   - Input mode indicator ("Mock (Mouse)")
+   - "Press SPACE to Start" prompt (pulsing green)
 4. Press **SPACE** to start the countdown
-5. You'll hear countdown beeps: **3... 2... 1... GO!**
-6. Drones spawn and fly toward the HVA (they may be invisible if you haven't created a drone Blueprint yet -- that's OK, they still have collision)
-7. **Aim** with the mouse, **click** to fire
-8. You should hear: fire sound, hit confirmation ping, drone explosion, damage alarm if drones reach the HVA
-9. The HUD shows: score, combo multiplier, wave number, kills, asset health, timer
-10. After 6 waves (or if the HVA is destroyed), the **GameOver** screen appears with final stats and the Top-10 scoreboard
+5. You'll hear countdown beeps and see large numbers: **3... 2... 1... GO!**
+6. Gameplay begins — drones spawn and fly toward the HVA
+   - Drones may be **invisible** if you haven't created a drone Blueprint yet (Phase 4) — that's OK, they still have collision and you can still hit them with hitscan
+7. **Aim** by moving the mouse, **left-click** to fire
+8. You should hear: fire sound on each shot, a metallic ping when you hit a drone, an explosion when a drone dies, and an alarm warble if drones reach the HVA
+9. The HUD displays: score (top-left), combo multiplier (below score), wave info (top-right), kill count (below wave), asset health bar (bottom-center), timer (top-center)
+10. After all 6 waves complete (or if the HVA health reaches 0), the **GameOver screen** appears with:
+    - Victory or Defeat title
+    - Final score, kill count, time survived
+    - Top-10 scoreboard
 11. Press **R** to restart
+12. To **stop playing** and return to the editor, press **Esc** or click the **Stop** button in the toolbar
 
 **If something is wrong:**
-- No HUD text? Make sure you placed the HVA in the map (the game warns in the Output Log if it's missing)
-- Drones not spawning? Check the Output Log (Window > Output Log) for error messages
-- Can't aim/fire? Make sure the viewport has focus (click in it)
+- **Black screen / no HUD text?** Make sure you placed the SDTHighValueAsset in the map (Step 5). The game warns in the Output Log if it's missing. Open the Output Log: **Window > Output Log** from the top menu, and look for yellow warning messages
+- **Drones not spawning?** Check the Output Log for error messages starting with "SDT:"
+- **Can't aim or fire?** The viewport needs focus. Click inside the game viewport. If your mouse cursor is visible, the game doesn't have input focus
+- **Viewport is too small?** You can click the three dots `...` next to the Play button and select **"New Editor Window (PIE)"** to play in a separate resizable window
+- **Mouse feels stuck?** Press **Shift+F1** to release the mouse from the game viewport while keeping the game running
 
 ---
 
 ### Phase 4: Make Drones Visible (Optional but Recommended)
 
-By default, drones have collision (you can hit them with hitscan) but no visible mesh. To give them a 3D model:
+By default, drones have collision (you can hit them with hitscan) but no visible mesh, so they're invisible. To give them a 3D model you need to create a **Blueprint** — this is UE5's visual scripting system, but here we're just using it to assign a mesh to the drone C++ class.
 
 **Step 9 -- Create a Drone Blueprint**
 
-1. In the **Content Browser** (bottom panel), right-click in an empty area
-2. Select **Blueprint Class**
-3. In the parent class picker, expand **All Classes**, search for **SDTDroneBase**
-4. Select `SDTDroneBase` and click **Select**
-5. Name it **BP_Drone**
-6. Double-click `BP_Drone` to open the Blueprint editor
-7. In the **Components** panel (left side), click on **DroneMesh**
-8. In the **Details** panel, find **Static Mesh** and pick a mesh:
-   - Type `Sphere` for a simple ball, or `Cube`, or import your own drone mesh
-9. Adjust the scale (e.g., `X=0.5, Y=0.5, Z=0.5` for a sphere)
-10. Optionally add a material for color
-11. Click **Compile** (top left) then **Save**
+1. Look at the **Content Browser** panel at the bottom of the editor. You should see your project's content folders
+   - If the Content Browser is not visible: go to **Window > Content Browser > Content Browser 1**
+2. **Right-click** in an empty area of the Content Browser (the right-side file area, not the folder tree)
+3. In the context menu, select **Blueprint Class**
+4. A **"Pick Parent Class"** dialog appears. You need to find our custom drone class:
+   - The common classes (Actor, Character, etc.) are shown at the top — ignore these
+   - Click **"All Classes"** to expand the full class list
+   - In the search box, type: **SDTDroneBase**
+   - Click on `SDTDroneBase` to select it (it should highlight)
+   - Click the **Select** button
+5. A new Blueprint asset appears in the Content Browser with a name field ready to edit. Type: **BP_Drone** and press **Enter**
+6. **Double-click** `BP_Drone` to open the Blueprint editor. A new window/tab opens with:
+   - **Components panel** (left side) — shows the parts of this actor (DroneMesh, DefaultSceneRoot, etc.)
+   - **Details panel** (right side) — shows properties of the selected component
+   - **Viewport** (center) — 3D preview of this Blueprint
+7. In the **Components panel** on the left, click on **DroneMesh** to select it
+8. In the **Details panel** on the right, find the property called **Static Mesh**:
+   - Click the dropdown next to **Static Mesh** (it says "None")
+   - In the search box, type: **Sphere**
+   - Select **Sphere** from the results
+   - The drone should now appear as a white sphere in the Blueprint viewport
+   - (You could also use `Cube` or `Cone` or any mesh you want)
+9. (Optional) Adjust the size: in the Details panel under **Transform > Scale**, set `X = 0.5`, `Y = 0.5`, `Z = 0.5` for a smaller drone
+10. (Optional) Add color: under **Materials** in the Details panel, click the dropdown next to **Element 0** and pick a material
+11. In the top-left of the Blueprint editor, click **Compile** (blue button with a checkmark). You should see "Compile Successful" in green
+12. Click **Save** (floppy disk icon next to Compile)
+13. Close the Blueprint editor tab (click the X on the tab) to return to the main editor
 
 **Step 10 -- Create a Wave Manager Blueprint**
 
-1. In Content Browser, right-click > **Blueprint Class**
-2. Search for **SDTWaveManager** as parent > Select > Name it **BP_WaveManager**
-3. Double-click to open
-4. In the **Details** panel (with the root selected), find **Drone Class**
-5. Set it to **BP_Drone** (the Blueprint you created in Step 9)
-6. You can also customize wave configs here (drone count, speed, spawn interval, delay per wave)
-7. **Compile** and **Save**
+The Wave Manager controls how drones spawn. We need to tell it to use our BP_Drone.
+
+1. In the **Content Browser**, **right-click** in an empty area > **Blueprint Class**
+2. In the parent class picker, click **All Classes**, search for: **SDTWaveManager**
+3. Select `SDTWaveManager` and click **Select**
+4. Name it: **BP_WaveManager** and press Enter
+5. **Double-click** `BP_WaveManager` to open the Blueprint editor
+6. In the **Details panel** on the right (make sure the root `BP_WaveManager(self)` is selected in the Components panel), find the property called **Drone Class**:
+   - Click the dropdown (it says "None" or "SDTDroneBase")
+   - Select **BP_Drone** (the Blueprint you created in Step 9)
+7. (Optional) You can scroll down in Details to find **Wave Configs** — this is a list of 6 waves. You can expand each entry to customize drone count, speed, spawn interval, and delay. The defaults work fine for testing
+8. Click **Compile**, then **Save**
+9. Close the Blueprint editor tab
 
 **Step 11 -- Create a Game Mode Blueprint**
 
-1. In Content Browser, right-click > **Blueprint Class**
-2. Search for **SDTGameMode** as parent > Select > Name it **BP_GameMode**
-3. Double-click to open
-4. In the **Details** panel, find **Wave Manager Class**
-5. Set it to **BP_WaveManager** (from Step 10)
-6. **Compile** and **Save**
-7. Go to **Edit > Project Settings > Maps & Modes**
-8. Set **Default GameMode** to **BP_GameMode**
+The Game Mode ties everything together. We need to tell it to use our Wave Manager.
+
+1. In the **Content Browser**, **right-click** > **Blueprint Class**
+2. Click **All Classes**, search for: **SDTGameMode**
+3. Select `SDTGameMode` and click **Select**
+4. Name it: **BP_GameMode** and press Enter
+5. **Double-click** `BP_GameMode` to open the Blueprint editor
+6. In the **Details panel** (with root selected), find **Wave Manager Class**:
+   - Click the dropdown and select **BP_WaveManager** (from Step 10)
+7. Click **Compile**, then **Save**
+8. Close the Blueprint editor tab
+9. Now tell the project to use this Game Mode:
+   - Go to **Edit > Project Settings** from the top menu bar
+   - In the left sidebar, click **Maps & Modes**
+   - Find **Default GameMode** at the top
+   - Click the dropdown and select **BP_GameMode**
+   - Close the Project Settings window
+10. **Ctrl+S** to save everything
 
 **Step 12 -- Test Again**
 
-1. Hit **Play** -- you should now see visible drones spawning and flying toward the HVA
-2. Shoot them with the mouse and verify they explode
+1. Click the green **Play** button (or **Alt+P**)
+2. You should now see visible drones (spheres) spawning in the distance and flying toward the HVA (cube)
+3. Press **SPACE** to start, aim with the mouse, and **left-click** to shoot the drones
+4. Verify: drones explode when hit, score increases, combo multiplier works, health bar decreases when drones reach the HVA
+5. Press **Esc** to stop playing and return to the editor
 
 ---
 
