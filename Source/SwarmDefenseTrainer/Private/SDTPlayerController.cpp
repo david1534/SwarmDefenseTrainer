@@ -91,14 +91,21 @@ void ASDTPlayerController::Tick(float DeltaTime)
 
 void ASDTPlayerController::HandleMockInput(float DeltaTime)
 {
-    // Standard mouse look — apply cached axis values with sensitivity
-    if (FMath::Abs(TurnInput) > 0.01f)
+    // Read mouse delta directly — bypasses the input binding system entirely.
+    // UE 5.7 defaults to Enhanced Input which silently ignores legacy AxisMappings
+    // for mouse axes. GetInputMouseDelta() reads raw hardware mouse movement
+    // regardless of which input system is active.
+    float MouseX = 0.f;
+    float MouseY = 0.f;
+    GetInputMouseDelta(MouseX, MouseY);
+
+    if (FMath::Abs(MouseX) > 0.01f)
     {
-        AddYawInput(TurnInput * YawSensitivity);
+        AddYawInput(MouseX * YawSensitivity);
     }
-    if (FMath::Abs(LookUpInput) > 0.01f)
+    if (FMath::Abs(MouseY) > 0.01f)
     {
-        AddPitchInput(LookUpInput * PitchSensitivity);
+        AddPitchInput(-MouseY * PitchSensitivity);
     }
 }
 
