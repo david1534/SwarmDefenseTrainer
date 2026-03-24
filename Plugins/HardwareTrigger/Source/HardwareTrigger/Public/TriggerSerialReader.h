@@ -41,7 +41,10 @@ private:
     FRunnableThread* Thread;
     FThreadSafeBool bRunning;
     FThreadSafeBool bConnected;
-    FThreadSafeBool bTriggerPressed;
+
+    /** Mutex protecting bTriggerPressedFlag for atomic consume operations */
+    mutable FCriticalSection TriggerMutex;
+    bool bTriggerPressedFlag;
 
 #if PLATFORM_WINDOWS
     void* SerialHandle;

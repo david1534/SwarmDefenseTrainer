@@ -94,6 +94,14 @@ uint32 FVN100OrientationReader::Run()
             Buffer[BytesRead] = 0;
             LineBuffer += UTF8_TO_TCHAR((char*)Buffer);
 
+            // Guard against unbounded growth from malformed data without newlines
+            if (LineBuffer.Len() > 4096)
+            {
+                UE_LOG(LogTemp, Warning, TEXT("VN100: LineBuffer exceeded 4KB without newline, flushing"));
+                LineBuffer.Empty();
+                continue;
+            }
+
             // Process all complete lines in the buffer
             int32 NewlineIdx;
             while (LineBuffer.FindChar('\n', NewlineIdx))
@@ -133,11 +141,28 @@ bool FVN100OrientationReader::ParseVNYPR(const FString& Line, float& OutYaw, flo
         return false;
     }
 
-    // Strip header "$VNYPR," and optional checksum "*XX"
+    // Validate checksum if present: XOR of all bytes between '$' and '*'
     FString Data = Line.Mid(7);
     int32 ChecksumIdx;
     if (Data.FindChar('*', ChecksumIdx))
     {
+        // Compute expected checksum (XOR of bytes between '$' and '*')
+        FString BodyForChecksum = Line.Mid(1, Line.Find(TEXT("*")) - 1);
+        uint8 Computed = 0;
+        for (int32 i = 0; i < BodyForChecksum.Len(); i++)
+        {
+            Computed ^= (uint8)BodyForChecksum[i];
+        }
+
+        // Parse the two-hex-digit checksum after '*'
+        FString HexStr = Data.Mid(ChecksumIdx + 1, 2);
+        uint8 Received = (uint8)FCString::Strtoi(*HexStr, nullptr, 16);
+
+        if (Computed != Received)
+        {
+            return false; // Corrupt sentence
+        }
+
         Data.LeftInline(ChecksumIdx);
     }
 
@@ -176,18 +201,33 @@ bool FVN100OrientationReader::OpenSerialPort(const FString& PortName, int32 Baud
 
     DCB dcb = {};
     dcb.DCBlength = sizeof(DCB);
-    GetCommState(SerialHandle, &dcb);
+    if (!GetCommState(SerialHandle, &dcb))
+    {
+        UE_LOG(LogTemp, Error, TEXT("VN100: GetCommState failed"));
+        CloseHandle(SerialHandle);
+        SerialHandle = INVALID_HANDLE_VALUE;
+        return false;
+    }
     dcb.BaudRate = BaudRate;
     dcb.ByteSize = 8;
     dcb.Parity = NOPARITY;
     dcb.StopBits = ONESTOPBIT;
-    SetCommState(SerialHandle, &dcb);
+    if (!SetCommState(SerialHandle, &dcb))
+    {
+        UE_LOG(LogTemp, Error, TEXT("VN100: SetCommState failed"));
+        CloseHandle(SerialHandle);
+        SerialHandle = INVALID_HANDLE_VALUE;
+        return false;
+    }
 
     COMMTIMEOUTS timeouts = {};
     timeouts.ReadIntervalTimeout = 10;
     timeouts.ReadTotalTimeoutMultiplier = 0;
     timeouts.ReadTotalTimeoutConstant = 50;
-    SetCommTimeouts(SerialHandle, &timeouts);
+    if (!SetCommTimeouts(SerialHandle, &timeouts))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("VN100: SetCommTimeouts failed, continuing anyway"));
+    }
 
     return true;
 
@@ -204,7 +244,13 @@ bool FVN100OrientationReader::OpenSerialPort(const FString& PortName, int32 Baud
 
     struct termios tty;
     memset(&tty, 0, sizeof(tty));
-    tcgetattr(SerialFileDescriptor, &tty);
+    if (tcgetattr(SerialFileDescriptor, &tty) != 0)
+    {
+        UE_LOG(LogTemp, Error, TEXT("VN100: tcgetattr failed: %d"), errno);
+        close(SerialFileDescriptor);
+        SerialFileDescriptor = -1;
+        return false;
+    }
 
     // Map baud rate
     speed_t speed = B115200;
@@ -228,7 +274,13 @@ bool FVN100OrientationReader::OpenSerialPort(const FString& PortName, int32 Baud
     tty.c_cc[VMIN] = 0;                           // non-blocking
     tty.c_cc[VTIME] = 1;                          // 100ms timeout
 
-    tcsetattr(SerialFileDescriptor, TCSANOW, &tty);
+    if (tcsetattr(SerialFileDescriptor, TCSANOW, &tty) != 0)
+    {
+        UE_LOG(LogTemp, Error, TEXT("VN100: tcsetattr failed: %d"), errno);
+        close(SerialFileDescriptor);
+        SerialFileDescriptor = -1;
+        return false;
+    }
 
     return true;
 #endif

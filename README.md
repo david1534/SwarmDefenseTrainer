@@ -1,6 +1,6 @@
 # Swarm Defense Trainer (SDT)
 
-Counter-UAS training system built with Unreal Engine 5.4. The player defends a High Value Asset against incoming drone swarms using a first-person hitscan weapon. Supports both standard mouse/keyboard input and custom hardware (VN-100 IMU orientation sensor + Arduino trigger button).
+Counter-UAS training system built with Unreal Engine 5.7. The player defends a High Value Asset against incoming drone swarms using a first-person hitscan weapon. Supports both standard mouse/keyboard input and custom hardware (VN-100 IMU orientation sensor + Arduino trigger button).
 
 ## Overview
 
@@ -50,7 +50,7 @@ PreGame (title screen) -> Countdown (3-2-1) -> Playing (6 waves) -> GameOver (vi
 
 | Software | Version | Download | Why |
 |----------|---------|----------|-----|
-| Unreal Engine | **5.4** | [Epic Games Launcher](https://www.unrealengine.com/download) | Game engine. Install via the Epic Games Launcher > Unreal Engine tab > Library > + button > 5.4. |
+| Unreal Engine | **5.7** | [Epic Games Launcher](https://www.unrealengine.com/download) | Game engine. Install via the Epic Games Launcher > Unreal Engine tab > Library > + button > 5.7. |
 | Visual Studio | **2022** (Windows) | [visualstudio.microsoft.com](https://visualstudio.microsoft.com/) | C++ compiler for UE5. During install, select the **"Game development with C++"** workload. |
 | Xcode | **15+** (Mac only) | Mac App Store | C++ compiler for UE5 on macOS. |
 | Arduino IDE | **2.0+** | [arduino.cc/en/software](https://www.arduino.cc/en/software) | For uploading the trigger button sketch to the Arduino. Only needed when integrating hardware. |
@@ -73,13 +73,13 @@ You do NOT need any hardware to develop and test. The game runs fully in mock mo
 
 ### Phase 1: Get UE5 Ready
 
-**Step 1 -- Install Unreal Engine 5.4**
+**Step 1 -- Install Unreal Engine 5.7**
 
 1. Download and install the [Epic Games Launcher](https://www.unrealengine.com/download)
 2. Open the launcher, go to the **Unreal Engine** tab
 3. Click **Library** in the left sidebar
 4. Click the **+** button next to "Engine Versions"
-5. Select version **5.4.x** and click **Install**
+5. Select version **5.7.x** and click **Install**
 6. Make sure you have at least **50 GB free disk space**
 7. Wait for the install to complete (this can take 30-60 minutes)
 
@@ -102,7 +102,7 @@ You do NOT need any hardware to develop and test. The game runs fully in mock mo
    git clone https://github.com/anthonyw298/SwarmDefenseTrainer.git
    ```
 2. Double-click `SwarmDefenseTrainer.uproject`
-3. If prompted to select an engine version, choose **5.4**
+3. If prompted to select an engine version, choose **5.7**
 4. UE5 will ask: *"Would you like to rebuild the missing modules?"* -- Click **Yes**
 5. Wait for compilation (first time takes 2-5 minutes depending on your machine)
 6. The UE5 editor opens with an empty/default viewport
@@ -424,7 +424,7 @@ SwarmDefenseTrainer/
         SDTDefaultSounds.h       # Procedural sound generator
       Private/
         (corresponding .cpp files)
-  SwarmDefenseTrainer.uproject   # UE5 project file (engine 5.4)
+  SwarmDefenseTrainer.uproject   # UE5 project file (engine 5.7)
 ```
 
 ---

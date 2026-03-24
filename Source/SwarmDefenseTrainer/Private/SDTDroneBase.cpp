@@ -24,6 +24,7 @@ ASDTDroneBase::ASDTDroneBase()
     ArrivalDistance = 200.f;
     bIsDead = false;
     WeaveTimeOffset = 0.f;
+    FlyingSoundComponent = nullptr;
 }
 
 void ASDTDroneBase::BeginPlay()

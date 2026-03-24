@@ -23,7 +23,7 @@ FTriggerSerialReader::FTriggerSerialReader()
 {
     bRunning = false;
     bConnected = false;
-    bTriggerPressed = false;
+    bTriggerPressedFlag = false;
 }
 
 FTriggerSerialReader::~FTriggerSerialReader()
@@ -67,9 +67,10 @@ void FTriggerSerialReader::Stop()
 
 bool FTriggerSerialReader::ConsumeTriggerPress()
 {
-    if (bTriggerPressed)
+    FScopeLock Lock(&TriggerMutex);
+    if (bTriggerPressedFlag)
     {
-        bTriggerPressed = false;
+        bTriggerPressedFlag = false;
         return true;
     }
     return false;
@@ -77,7 +78,8 @@ bool FTriggerSerialReader::ConsumeTriggerPress()
 
 bool FTriggerSerialReader::IsTriggerPressed() const
 {
-    return bTriggerPressed;
+    FScopeLock Lock(&TriggerMutex);
+    return bTriggerPressedFlag;
 }
 
 bool FTriggerSerialReader::IsConnected() const
@@ -105,7 +107,8 @@ uint32 FTriggerSerialReader::Run()
                 // Arduino sends 'F' when trigger is pulled
                 if (Buffer[i] == 'F')
                 {
-                    bTriggerPressed = true;
+                    FScopeLock Lock(&TriggerMutex);
+                    bTriggerPressedFlag = true;
                 }
             }
         }
@@ -138,26 +141,51 @@ bool FTriggerSerialReader::OpenSerialPort(const FString& PortName, int32 BaudRat
 
     DCB dcb = {};
     dcb.DCBlength = sizeof(DCB);
-    GetCommState(SerialHandle, &dcb);
+    if (!GetCommState(SerialHandle, &dcb))
+    {
+        UE_LOG(LogTemp, Error, TEXT("Trigger: GetCommState failed"));
+        CloseHandle(SerialHandle);
+        SerialHandle = INVALID_HANDLE_VALUE;
+        return false;
+    }
     dcb.BaudRate = BaudRate;
     dcb.ByteSize = 8;
     dcb.Parity = NOPARITY;
     dcb.StopBits = ONESTOPBIT;
-    SetCommState(SerialHandle, &dcb);
+    if (!SetCommState(SerialHandle, &dcb))
+    {
+        UE_LOG(LogTemp, Error, TEXT("Trigger: SetCommState failed"));
+        CloseHandle(SerialHandle);
+        SerialHandle = INVALID_HANDLE_VALUE;
+        return false;
+    }
 
     COMMTIMEOUTS timeouts = {};
     timeouts.ReadIntervalTimeout = 10;
     timeouts.ReadTotalTimeoutConstant = 50;
-    SetCommTimeouts(SerialHandle, &timeouts);
+    if (!SetCommTimeouts(SerialHandle, &timeouts))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Trigger: SetCommTimeouts failed, continuing anyway"));
+    }
 
     return true;
 #else
     SerialFileDescriptor = open(TCHAR_TO_UTF8(*PortName), O_RDONLY | O_NOCTTY | O_NONBLOCK);
-    if (SerialFileDescriptor < 0) return false;
+    if (SerialFileDescriptor < 0)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Trigger: POSIX open failed: %d"), errno);
+        return false;
+    }
 
     struct termios tty;
     memset(&tty, 0, sizeof(tty));
-    tcgetattr(SerialFileDescriptor, &tty);
+    if (tcgetattr(SerialFileDescriptor, &tty) != 0)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Trigger: tcgetattr failed: %d"), errno);
+        close(SerialFileDescriptor);
+        SerialFileDescriptor = -1;
+        return false;
+    }
 
     speed_t speed = B9600; // Arduino default
     if (BaudRate == 115200) speed = B115200;
@@ -178,7 +206,13 @@ bool FTriggerSerialReader::OpenSerialPort(const FString& PortName, int32 BaudRat
     tty.c_cc[VMIN] = 0;
     tty.c_cc[VTIME] = 1;
 
-    tcsetattr(SerialFileDescriptor, TCSANOW, &tty);
+    if (tcsetattr(SerialFileDescriptor, TCSANOW, &tty) != 0)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Trigger: tcsetattr failed: %d"), errno);
+        close(SerialFileDescriptor);
+        SerialFileDescriptor = -1;
+        return false;
+    }
     return true;
 #endif
 }

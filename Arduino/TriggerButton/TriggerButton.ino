@@ -8,7 +8,7 @@
  *   - The internal pull-up resistor is used (no external resistor needed)
  * 
  * Protocol:
- *   - When the button is pressed, sends 'F' over serial at 9600 baud
+ *   - When the button is pressed, sends 'F' over serial at 115200 baud
  *   - The UE5 HardwareTrigger plugin reads this byte to fire the weapon
  *   - 100ms debounce prevents multiple fires from a single press
  * 
@@ -23,7 +23,7 @@ const unsigned long DEBOUNCE_MS = 100;
 unsigned long lastFireTime = 0;
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
     pinMode(TRIGGER_PIN, INPUT_PULLUP);
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, LOW);

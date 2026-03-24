@@ -1,4 +1,5 @@
 #include "VN100InputModule.h"
+#include "VN100BlueprintLibrary.h"
 
 #define LOCTEXT_NAMESPACE "FVN100InputModule"
 
@@ -9,6 +10,7 @@ void FVN100InputModule::StartupModule()
 
 void FVN100InputModule::ShutdownModule()
 {
+    UVN100BlueprintLibrary::StopVN100();
     UE_LOG(LogTemp, Log, TEXT("VN100Input: Plugin unloaded"));
 }
 
