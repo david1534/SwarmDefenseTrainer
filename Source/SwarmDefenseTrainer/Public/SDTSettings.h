@@ -5,14 +5,15 @@
 #include "SDTSettings.generated.h"
 
 /**
- * Input mode enum — toggles between mouse (dev) and real hardware (VN-100 + trigger).
+ * Input mode enum — toggles between mouse-only (dev) and VN-100 hardware aiming.
+ * In both modes the mouse left-click fires the weapon.
  * Set in DefaultGame.ini or Project Settings > SDT Settings.
  */
 UENUM(BlueprintType)
 enum class ESDTInputMode : uint8
 {
-    MockInput       UMETA(DisplayName = "Mock (Mouse)"),
-    HardwareInput   UMETA(DisplayName = "Hardware (VN-100 + Trigger)")
+    MockInput       UMETA(DisplayName = "Mock (Mouse Aim + Click)"),
+    HardwareInput   UMETA(DisplayName = "Hardware (VN-100 Aim + Mouse Click)")
 };
 
 /**
@@ -35,11 +36,7 @@ public:
     UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Input|Hardware")
     FString OrientationSerialPort;
 
-    /** Serial port name for the Arduino trigger button */
-    UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Input|Hardware")
-    FString TriggerSerialPort;
-
-    /** Baud rate for serial communication */
+    /** Baud rate for VN-100 serial communication */
     UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Input|Hardware")
     int32 BaudRate;
 

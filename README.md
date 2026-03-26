@@ -1,6 +1,6 @@
 # Swarm Defense Trainer (SDT)
 
-Counter-UAS training system built with Unreal Engine 5.7.4+. The player defends a High Value Asset against incoming drone swarms using a first-person hitscan weapon. Supports both standard mouse/keyboard input and custom hardware (VN-100 IMU orientation sensor + Arduino trigger button).
+Counter-UAS training system built with Unreal Engine 5.7.4+. The player defends a High Value Asset against incoming drone swarms using a first-person hitscan weapon. Supports both standard mouse/keyboard input and VN-100 IMU hardware aiming with mouse-click firing.
 
 ## Overview
 
@@ -23,7 +23,7 @@ PreGame (title screen) -> Countdown (3-2-1) -> Playing (6 waves) -> GameOver (vi
 |-------|---------|
 | `SDTGameMode` | Game flow state machine, wave/score manager ownership, hardware init/shutdown |
 | `SDTCharacter` | Stationary first-person character with camera and weapon mesh |
-| `SDTPlayerController` | Input bridge: mouse (mock) or VN-100 (hardware), fire handling, calibration |
+| `SDTPlayerController` | Input bridge: mouse (mock) or VN-100 (hardware) aiming, mouse-click firing, calibration |
 | `SDTWeaponComponent` | Hitscan weapon: line trace, cooldown, sound/visual effects |
 | `SDTDroneBase` | Autonomous drone enemy: flies toward HVA, weaving motion, damageable |
 | `SDTWaveManager` | Spawns drones across 6 escalating waves with configurable timing |
@@ -35,12 +35,11 @@ PreGame (title screen) -> Countdown (3-2-1) -> Playing (6 waves) -> GameOver (vi
 | `SDTHUD` | Canvas-based HUD: all screens drawn directly (no UMG widgets) |
 | `SDTDefaultSounds` | Procedural sound effects generated at runtime (no WAV files needed) |
 
-### Plugins
+### Plugin
 
 | Plugin | Purpose |
 |--------|---------|
 | `VN100Input` | Custom UE5 plugin that reads orientation (yaw/pitch/roll) from a VectorNav VN-100 IMU over serial. Background thread, thread-safe, cross-platform (Win32 + POSIX). |
-| `HardwareTrigger` | Custom UE5 plugin that reads fire button signals from an Arduino over serial. Detects 'F' byte protocol. |
 
 ---
 
@@ -53,19 +52,16 @@ PreGame (title screen) -> Countdown (3-2-1) -> Playing (6 waves) -> GameOver (vi
 | Unreal Engine | **5.7.4+** | [Epic Games Launcher](https://www.unrealengine.com/download) | Game engine. Install via the Epic Games Launcher > Unreal Engine tab > Library > + button > 5.7. |
 | Visual Studio | **2022 or 2026** (Windows) | [visualstudio.microsoft.com](https://visualstudio.microsoft.com/) | C++ compiler for UE5. During install, select the **"Game development with C++"** and **"Desktop development with C++"** workloads. If using VS 2026, also install the **MSVC v143** toolset via Individual Components to ensure UBT compatibility. |
 | Xcode | **15+** (Mac only) | Mac App Store | C++ compiler for UE5 on macOS. |
-| Arduino IDE | **2.0+** | [arduino.cc/en/software](https://www.arduino.cc/en/software) | For uploading the trigger button sketch to the Arduino. Only needed when integrating hardware. |
 
-### Hardware You Need (for full integration)
+### Hardware You Need (for VN-100 integration)
 
 | Hardware | Purpose | Notes |
 |----------|---------|-------|
 | VectorNav VN-100 IMU | Orientation sensor (aim control) | Mounted to the hand-held device. Connects via USB serial. |
-| Arduino board | Trigger button controller | Arduino Nano, Uno, or any compatible board. |
-| Momentary push button | Fire trigger | Wired between Arduino pin D2 and GND. |
-| USB cables (x2) | Connect VN-100 and Arduino to PC | One for each device. |
-| Hand-held chassis | Physical housing | Custom-built to hold the VN-100 and trigger button. |
+| USB cable (x1) | Connect VN-100 to PC | Standard USB cable for the VN-100. |
+| Hand-held chassis | Physical housing | Custom-built to hold the VN-100. Mouse is used for firing. |
 
-You do NOT need any hardware to develop and test. The game runs fully in mock mode with mouse and keyboard.
+You do NOT need any hardware to develop and test. The game runs fully in mock mode with mouse and keyboard. In hardware mode, the VN-100 controls aiming and the mouse left-click fires.
 
 ---
 
@@ -338,29 +334,9 @@ Custom assets override the procedural defaults. If a sound property is left empt
 
 ---
 
-### Phase 6: Hardware Integration (When Hardware Arrives)
+### Phase 6: VN-100 Hardware Integration (When Hardware Arrives)
 
-#### Step 13 -- Set Up the Arduino Trigger Button
-
-**What you need:** Arduino board, momentary push button, USB cable.
-
-1. Install the [Arduino IDE](https://www.arduino.cc/en/software)
-2. Connect the Arduino to your PC via USB
-3. Open `Arduino/TriggerButton/TriggerButton.ino` in the Arduino IDE
-4. Select your board type: **Tools > Board** (e.g., Arduino Nano, Arduino Uno)
-5. Select the COM port: **Tools > Port** (e.g., COM4, /dev/cu.usbserial-XXX)
-6. Click **Upload** (right arrow button)
-7. Wait for "Done uploading"
-8. Wire the push button:
-   - One leg of the button to **Arduino pin D2**
-   - Other leg to **GND**
-   - No resistor needed (the code uses the Arduino's internal pull-up)
-9. Test: Open **Tools > Serial Monitor** in the Arduino IDE, set baud to **9600**
-10. Press the button -- you should see `F` characters appear in the serial monitor
-11. Close the Serial Monitor (important -- the game needs exclusive access to the port)
-12. Note the COM port number (you'll need it later)
-
-#### Step 14 -- Set Up the VN-100 Orientation Sensor
+#### Step 13 -- Set Up the VN-100 Orientation Sensor
 
 **What you need:** VectorNav VN-100 IMU, USB cable, VectorNav SensorExplorer software.
 
@@ -382,16 +358,15 @@ Custom assets override the procedural defaults. If a sound property is left empt
 
 **IMPORTANT**: The plugin ONLY parses `$VNYPR` sentences. Other VN-100 output formats (`$VNYMR`, `$VNIMU`, binary packets) will NOT work. Make sure the async output type is set to YPR.
 
-#### Step 15 -- Mount Hardware to Hand-Held Device
+#### Step 14 -- Mount the VN-100 to the Hand-Held Device
 
 1. Mount the VN-100 securely to your hand-held chassis
    - Orientation matters: the VN-100's X-axis should point forward (the direction you aim)
    - Secure it so it doesn't shift during use
-2. Mount the Arduino and trigger button to the chassis
-   - Position the button where the trigger finger rests
-3. Route both USB cables so they reach the PC
+2. Route the USB cable so it reaches the PC
+3. The mouse is used for firing -- position it within easy reach of the operator, or attach a mouse button to the chassis
 
-#### Step 16 -- Configure the Game for Hardware
+#### Step 15 -- Configure the Game for Hardware Mode
 
 1. Open `Config/DefaultGame.ini` in a text editor
 2. Change the following values:
@@ -399,38 +374,35 @@ Custom assets override the procedural defaults. If a sound property is left empt
    [/Script/SwarmDefenseTrainer.SDTSettings]
    InputMode=HardwareInput
    OrientationSerialPort=COM3
-   TriggerSerialPort=COM4
    BaudRate=115200
    ```
    - Replace `COM3` with the VN-100's actual COM port (e.g., `COM5`, or `/dev/tty.usbserial-XXXX` on Mac)
-   - Replace `COM4` with the Arduino's actual COM port
 3. Save the file
 
-**Finding COM ports:**
-- *Windows:* Open **Device Manager > Ports (COM & LPT)** -- each device shows its COM number
+**Finding the COM port:**
+- *Windows:* Open **Device Manager > Ports (COM & LPT)** -- the VN-100 shows its COM number. You can also plug/unplug the USB cable to see which port appears/disappears
 - *Mac:* Open Terminal and run `ls /dev/tty.usb*` -- each device shows as `/dev/tty.usbserial-XXXX` or `/dev/tty.usbmodem-XXXX`
 
-#### Step 17 -- Test Hardware Mode
+#### Step 16 -- Test Hardware Mode
 
-1. Make sure both the VN-100 and Arduino are plugged in via USB
-2. Make sure SensorExplorer and Arduino Serial Monitor are CLOSED (they lock the port)
+1. Make sure the VN-100 is plugged in via USB
+2. Make sure SensorExplorer is CLOSED (it locks the serial port)
 3. Open the UE5 project and hit **Play**
 4. Check the **Output Log** (Window > Output Log) for:
    ```
    SDT: VN-100 connected on COM3 @ 115200 baud
-   SDT: Trigger connected on COM4 @ 9600 baud
    ```
-   If you see "Failed to connect" warnings, double-check the COM port numbers and that no other software has the port open.
+   If you see a "Failed to connect" warning, double-check the COM port number and that no other software has the port open.
 5. During gameplay, the HUD (bottom-right) shows:
    - `VN-100: CONNECTED` with a green indicator
-   - `TRIGGER: CONNECTED` with a green indicator
+   - `FIRE: Mouse Click` label
 6. Press **SPACE** to start
 7. **Aim** by physically moving the hand-held device -- the weapon follows the VN-100 orientation
 8. Press **C** to **calibrate** -- this sets the current device position as "center" (aiming straight ahead)
-9. **Pull the trigger** to fire
-10. Press **T** at any time to toggle back to mouse mode if needed
+9. **Left-click the mouse** to fire
+10. Press **T** at any time to toggle back to full mouse mode if needed
 
-#### Step 18 -- Tune Sensitivity
+#### Step 17 -- Tune Sensitivity
 
 If aiming feels too fast, too slow, or jittery, adjust these in `Config/DefaultGame.ini`:
 
@@ -448,10 +420,10 @@ These are also editable in the UE5 editor: **Project Settings > Game > SDT Setti
 
 ## Controls Reference
 
-| Action | Mock (Mouse) | Hardware |
+| Action | Mock (Mouse) | Hardware (VN-100) |
 |--------|-------------|----------|
 | Aim | Mouse movement | VN-100 orientation |
-| Fire | Left mouse button | Arduino trigger button |
+| Fire | Left mouse button | Left mouse button |
 | Calibrate | C | C (sets VN-100 center) |
 | Toggle input mode | T | T |
 | Start game | SPACE | SPACE |
@@ -473,9 +445,6 @@ Open the UE5 console with `~` and type:
 
 ```
 SwarmDefenseTrainer/
-  Arduino/
-    TriggerButton/
-      TriggerButton.ino          # Arduino sketch for fire button
   Config/
     DefaultEngine.ini            # Game mode, map, game instance config
     DefaultGame.ini              # SDT settings (input mode, serial ports, tuning)
@@ -492,16 +461,6 @@ SwarmDefenseTrainer/
           VN100InputModule.cpp
           VN100OrientationReader.cpp # Cross-platform serial (Win32 + POSIX)
           VN100BlueprintLibrary.cpp  # Singleton reader management
-    HardwareTrigger/             # Custom UE5 plugin: Arduino trigger button
-      Source/HardwareTrigger/
-        Public/
-          HardwareTriggerModule.h
-          TriggerSerialReader.h      # Background serial reader thread
-          TriggerBlueprintLibrary.h  # Blueprint API: Start/Stop/Consume/IsConnected
-        Private/
-          HardwareTriggerModule.cpp
-          TriggerSerialReader.cpp    # Cross-platform serial (Win32 + POSIX)
-          TriggerBlueprintLibrary.cpp
   Source/
     SwarmDefenseTrainer/
       Public/
@@ -571,14 +530,14 @@ The project uses `.Latest` enum values in its Target.cs build files rather than 
 
 | # | Requirement | Status |
 |---|-------------|--------|
-| 1 | Custom hardware & software | Met |
+| 1 | Custom hardware & software | Met (VN-100 IMU + mouse) |
 | 2 | FPS-style gameplay | Met |
 | 3 | Single player | Met |
 | 4 | Gameplay >= 30 seconds | Met (wave design ~74s min + explicit 30s safety net) |
 | 5 | Defeat incoming autonomous vehicles | Met |
 | 6 | Scoring system | Met |
 | 7 | Top-10 scoreboard | Met |
-| 8 | Hand-held hardware | Met (software ready, see Phase 6) |
-| 9 | VN-100 mounted to hardware | Met (software ready, see Phase 6) |
+| 8 | Hand-held hardware | Met (VN-100 for aiming, mouse for firing; see Phase 6) |
+| 9 | VN-100 mounted to hardware | Met (VN-100 controls aim via custom UE5 plugin; see Phase 6) |
 | 10 | VN-100 controls aim via custom UE plugin | Met |
 | 11 | Sound effects | Met (procedural defaults + custom asset support) |

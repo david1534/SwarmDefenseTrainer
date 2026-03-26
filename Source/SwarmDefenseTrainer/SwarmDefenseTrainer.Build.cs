@@ -12,10 +12,7 @@ public class SwarmDefenseTrainer : ModuleRules
             "Engine",
             "InputCore",
             "DeveloperSettings",
-            "Slate",
-            "SlateCore",
-            "VN100Input",
-            "HardwareTrigger"
+            "VN100Input"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });

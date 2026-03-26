@@ -6,7 +6,6 @@
 #include "SDTGameInstance.h"
 #include "SDTScoreManager.h"
 #include "VN100BlueprintLibrary.h"
-#include "TriggerBlueprintLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/InputSettings.h"
 #include "Engine/LocalPlayer.h"
@@ -156,22 +155,8 @@ void ASDTPlayerController::HandleHardwareInput(float DeltaTime)
 
 void ASDTPlayerController::HandleFireInput()
 {
-    bool bShouldFire = false;
-
-    switch (CurrentInputMode)
-    {
-    case ESDTInputMode::MockInput:
-        bShouldFire = bFireHeld;
-        break;
-    case ESDTInputMode::HardwareInput:
-        // Check both hardware trigger AND mouse click (allow mouse as fallback)
-        // Use ConsumeTriggerPress() so the flag clears after each read,
-        // preventing a single press from firing indefinitely.
-        bShouldFire = UTriggerBlueprintLibrary::ConsumeTriggerPress() || bFireHeld;
-        break;
-    }
-
-    if (bShouldFire)
+    // Mouse left-click fires in both Mock and Hardware modes
+    if (bFireHeld)
     {
         ASDTCharacter* SDTChar = Cast<ASDTCharacter>(GetPawn());
         if (SDTChar && SDTChar->WeaponComponent)

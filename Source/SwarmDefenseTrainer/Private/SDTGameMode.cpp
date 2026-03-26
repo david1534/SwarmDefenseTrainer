@@ -10,7 +10,6 @@
 #include "SDTGameInstance.h"
 #include "SDTDefaultSounds.h"
 #include "VN100BlueprintLibrary.h"
-#include "TriggerBlueprintLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 
@@ -221,21 +220,7 @@ void ASDTGameMode::InitializeHardware()
             *Settings->OrientationSerialPort);
     }
 
-    // Start Arduino trigger button (always 9600 baud per spec)
-    bool bTrigger = UTriggerBlueprintLibrary::StartTrigger(
-        Settings->TriggerSerialPort, 9600);
-    if (bTrigger)
-    {
-        UE_LOG(LogTemp, Log, TEXT("SDT: Trigger connected on %s @ 9600 baud"),
-            *Settings->TriggerSerialPort);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("SDT: Failed to connect trigger on %s — is the Arduino plugged in?"),
-            *Settings->TriggerSerialPort);
-    }
-
-    bHardwareInitialized = bVN100 || bTrigger;
+    bHardwareInitialized = bVN100;
 }
 
 void ASDTGameMode::ShutdownHardware()
@@ -244,7 +229,6 @@ void ASDTGameMode::ShutdownHardware()
 
     UE_LOG(LogTemp, Log, TEXT("SDT: Shutting down hardware connections..."));
     UVN100BlueprintLibrary::StopVN100();
-    UTriggerBlueprintLibrary::StopTrigger();
     bHardwareInitialized = false;
 }
 

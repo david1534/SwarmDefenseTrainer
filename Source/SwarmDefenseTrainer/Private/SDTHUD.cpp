@@ -6,7 +6,6 @@
 #include "SDTSettings.h"
 #include "SDTSaveGame.h"
 #include "VN100BlueprintLibrary.h"
-#include "TriggerBlueprintLibrary.h"
 #include "Engine/Canvas.h"
 #include "Engine/Font.h"
 #include "Kismet/GameplayStatics.h"
@@ -89,8 +88,8 @@ void ASDTHUD::DrawPreGameScreen()
     if (Settings)
     {
         FString ModeText = Settings->InputMode == ESDTInputMode::MockInput
-            ? TEXT("Input Mode: Mouse + Click (Mock)")
-            : TEXT("Input Mode: VN-100 + Arduino Trigger (Hardware)");
+            ? TEXT("Input Mode: Mouse Aim + Click (Mock)")
+            : TEXT("Input Mode: VN-100 Aim + Mouse Click (Hardware)");
         DrawText(ModeText, FLinearColor(0.6f, 0.8f, 0.6f, 1.f),
             CenterX - 200.f, CenterY - 40.f, HUDFont, 0.9f);
     }
@@ -100,7 +99,7 @@ void ASDTHUD::DrawPreGameScreen()
         CenterX - 130.f, CenterY + 10.f, HUDFont, 1.f);
     DrawText(TEXT("Mouse / VN-100  -  Aim"), FLinearColor(0.7f, 0.7f, 0.7f, 1.f),
         CenterX - 130.f, CenterY + 35.f, HUDFont, 0.8f);
-    DrawText(TEXT("Left Click / Trigger  -  Fire"), FLinearColor(0.7f, 0.7f, 0.7f, 1.f),
+    DrawText(TEXT("Left Click  -  Fire"), FLinearColor(0.7f, 0.7f, 0.7f, 1.f),
         CenterX - 130.f, CenterY + 55.f, HUDFont, 0.8f);
     DrawText(TEXT("C  -  Calibrate (Hardware Mode)"), FLinearColor(0.7f, 0.7f, 0.7f, 1.f),
         CenterX - 130.f, CenterY + 75.f, HUDFont, 0.8f);
@@ -315,16 +314,12 @@ void ASDTHUD::DrawHardwareStatus()
     float Y = Canvas->SizeY - 60.f;
 
     bool bVN100 = UVN100BlueprintLibrary::IsVN100Connected();
-    bool bTrigger = UTriggerBlueprintLibrary::IsTriggerConnected();
 
     FLinearColor VNColor = bVN100 ? FLinearColor::Green : FLinearColor::Red;
-    FLinearColor TrigColor = bTrigger ? FLinearColor::Green : FLinearColor::Red;
-
     FString VNStatus = bVN100 ? TEXT("VN-100: CONNECTED") : TEXT("VN-100: DISCONNECTED");
-    FString TrigStatus = bTrigger ? TEXT("TRIGGER: CONNECTED") : TEXT("TRIGGER: DISCONNECTED");
 
     DrawText(VNStatus, VNColor, X, Y, HUDFont, 0.7f);
-    DrawText(TrigStatus, TrigColor, X, Y + 18.f, HUDFont, 0.7f);
+    DrawText(TEXT("FIRE: Mouse Click"), FLinearColor(0.6f, 0.8f, 0.6f, 1.f), X, Y + 18.f, HUDFont, 0.7f);
 }
 
 // ============================================================

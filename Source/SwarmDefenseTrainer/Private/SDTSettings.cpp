@@ -4,7 +4,6 @@ USDTSettings::USDTSettings()
 {
     InputMode = ESDTInputMode::MockInput;
     OrientationSerialPort = TEXT("COM3");
-    TriggerSerialPort = TEXT("COM4");
     BaudRate = 115200;
     YawSensitivity = 1.0f;
     PitchSensitivity = 1.0f;

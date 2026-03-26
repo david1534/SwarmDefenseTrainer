@@ -17,10 +17,6 @@
         {
             "Name": "VN100Input",
             "Enabled": true
-        },
-        {
-            "Name": "HardwareTrigger",
-            "Enabled": true
         }
     ]
 }

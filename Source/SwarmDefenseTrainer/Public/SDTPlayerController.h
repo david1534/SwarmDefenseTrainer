@@ -11,7 +11,7 @@ class USDTWeaponComponent;
  * Player controller that bridges hardware input to gameplay.
  *
  * In MockInput mode: standard mouse look + left-click to fire.
- * In HardwareInput mode: VN-100 orientation controls aim, Arduino trigger fires.
+ * In HardwareInput mode: VN-100 orientation controls aim, mouse left-click fires.
  *
  * Handles calibration, sensitivity, smoothing, dead zones, and debug commands.
  */
