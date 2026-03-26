@@ -11,6 +11,7 @@
 #include "GameFramework/InputSettings.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/GameViewportClient.h"
+#include "Framework/Application/SlateApplication.h"
 
 ASDTPlayerController::ASDTPlayerController()
 {
@@ -60,7 +61,7 @@ void ASDTPlayerController::BeginPlay()
         LP->ViewportClient->SetMouseLockMode(EMouseLockMode::LockAlways);
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("SDT: PlayerController BeginPlay — mouse LockAlways applied, using GetInputAnalogKeyState (v5)"));
+    UE_LOG(LogTemp, Warning, TEXT("SDT: PlayerController BeginPlay — mouse LockAlways applied, using Slate GetCursorDelta (v6)"));
 }
 
 void ASDTPlayerController::SetupInputComponent()
@@ -107,19 +108,21 @@ void ASDTPlayerController::Tick(float DeltaTime)
 
 void ASDTPlayerController::HandleMockInput(float DeltaTime)
 {
-    // Read mouse axes using GetInputAnalogKeyState — the most low-level
-    // input API in UE5. This bypasses both Enhanced Input and legacy
-    // AxisMapping systems, reading directly from the hardware input state.
-    float MouseX = GetInputAnalogKeyState(EKeys::MouseX);
-    float MouseY = GetInputAnalogKeyState(EKeys::MouseY);
+    // Read mouse delta directly from Slate (OS level). This completely
+    // bypasses UE's input system (both Enhanced and Legacy), reading raw
+    // mouse movement from the operating system. This is the most reliable
+    // method and works regardless of which PlayerInput class is active.
+    if (!FSlateApplication::IsInitialized()) return;
 
-    if (FMath::Abs(MouseX) > 0.01f)
+    FVector2D MouseDelta = FSlateApplication::Get().GetCursorDelta();
+
+    if (FMath::Abs(MouseDelta.X) > 0.01f)
     {
-        AddYawInput(MouseX * YawSensitivity);
+        AddYawInput(MouseDelta.X * YawSensitivity * 0.1f);
     }
-    if (FMath::Abs(MouseY) > 0.01f)
+    if (FMath::Abs(MouseDelta.Y) > 0.01f)
     {
-        AddPitchInput(-MouseY * PitchSensitivity);
+        AddPitchInput(-MouseDelta.Y * PitchSensitivity * 0.1f);
     }
 }
 
