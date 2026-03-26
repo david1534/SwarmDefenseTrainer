@@ -9,6 +9,8 @@
 #include "TriggerBlueprintLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/InputSettings.h"
+#include "Engine/LocalPlayer.h"
+#include "Engine/GameViewportClient.h"
 
 ASDTPlayerController::ASDTPlayerController()
 {
@@ -47,13 +49,18 @@ void ASDTPlayerController::BeginPlay()
     FInputModeGameOnly InputMode;
     SetInputMode(InputMode);
 
-    // Mouse capture/lock is configured in DefaultInput.ini via:
-    //   DefaultViewportMouseCaptureMode=CapturePermanently_IncludingInitialMouseDown
-    //   DefaultViewportMouseLockMode=LockAlways
-    // UE 5.7.4 removed SetCaptureMouseOnClick from UGameViewportClient,
-    // so config-based settings are the correct approach.
+    // FInputModeGameOnly overrides our DefaultInput.ini settings, changing
+    // LockAlways -> LockOnCapture. Re-apply LockAlways so the mouse is
+    // captured immediately in PIE without needing a click first.
+    // Note: SetCaptureMouseOnClick was removed in UE 5.7.4, but
+    // SetMouseLockMode still exists on UGameViewportClient.
+    ULocalPlayer* LP = GetLocalPlayer();
+    if (LP && LP->ViewportClient)
+    {
+        LP->ViewportClient->SetMouseLockMode(EMouseLockMode::LockAlways);
+    }
 
-    UE_LOG(LogTemp, Warning, TEXT("SDT: PlayerController BeginPlay — using GetInputAnalogKeyState for mouse input (v4)"));
+    UE_LOG(LogTemp, Warning, TEXT("SDT: PlayerController BeginPlay — mouse LockAlways applied, using GetInputAnalogKeyState (v5)"));
 }
 
 void ASDTPlayerController::SetupInputComponent()
